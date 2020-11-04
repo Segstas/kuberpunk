@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: kuberpunk-cloud-replacement
+    
+logging:
+  pattern: 
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+
+  cloud:
+    config:
+      uri: http://localhost:8088
+    gateway:
+      discovery:
+        locator:
+          routeToLocalService: true
+          enabled: true
+          lower-case-service-id: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+env:
+  - name: ROUTETOREDIRECT
+    valueFrom:
+      configMapKeyRef:
+        name: localhost-to-route
+        key: ROUTETOREDIRECT
+
+#springdoc:
+#  api-docs:
+#server:
+#  port: 4545
+#    path:
