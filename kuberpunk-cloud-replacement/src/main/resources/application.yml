@@ -22,11 +22,11 @@ management:
         include: '*'
 
 env:
-  - name: ROUTETOREDIRECT
+  - name: ROUTE_TO_REDIRECT
     valueFrom:
       configMapKeyRef:
         name: localhost-to-route
-        key: ROUTETOREDIRECT
+        key: ROUTE_TO_REDIRECT
 
 #springdoc:
 #  api-docs:

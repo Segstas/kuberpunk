@@ -5,4 +5,4 @@ metadata:
   labels:
     app: employee
 data:
-  ROUTETOREDIRECT: 192.168.0.27
+  ROUTE_TO_REDIRECT: 192.168.0.27

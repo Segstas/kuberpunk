@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: gateway-service
-        image: mabikon/kuberpunk-cloud-replacement-0.0.1
+        image: mabikon/kuberpunk-cloud-replacement-0.1
         ports:
         - containerPort: 8080
 ---
@@ -28,7 +28,7 @@ metadata:
     app: gateway-service
 spec:
   ports:
-  - port: 8080
+  - port: 1234
     protocol: TCP
   selector:
     app: gateway-service

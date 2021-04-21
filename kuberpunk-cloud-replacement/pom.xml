@@ -18,7 +18,7 @@
 
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.sbt</groupId>
+    <groupId>com.kuberpunk</groupId>
     <artifactId>kuberpunk-cloud-replacement</artifactId>
     <version>0.0.2</version>
     <name>kuberpunk-cloud-replacement</name>
@@ -121,6 +121,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgument>-XDignore.symbol.file</compilerArgument>
+                </configuration>
             </plugin>
         </plugins>
     </build>

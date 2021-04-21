@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "cloud.controller.service.name",
+      "type": "java.lang.String",
+      "description": "Description for cloud.controller.service.name."
+  }
+] }
