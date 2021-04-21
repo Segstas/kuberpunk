@@ -37,8 +37,6 @@ public class RestRedirectInformationPullerImpl implements RedirectInformationPul
 
     @Override
     public void pullRedirectInformation(String serviceName, String namespace) {
-        //cloudControllerClient.registerClient(serviceName, redirectAddressMiner.getRedirectAddress());
-
         ClientData clientData = new ClientData(serviceName, redirectAddressMiner.getRedirectAddress());
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<ClientData> request =

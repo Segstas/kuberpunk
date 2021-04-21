@@ -69,34 +69,3 @@ public class GatewayApplication {
     LOGGER.info("*** Kuberpunk cloud sidecar v1.0 ***");
   }
 }
-
-
-
-
-
-
-/*
-  @RequestMapping("/{serviceId}")
-  public String redirectToDesired(@PathVariable("serviceId") String serviceId) {
-    restTemplate.
-    return repository.findByOrganization(organizationId);
-  }
-*/
-
-
-/*  @GetMapping("/test")
-  @ResponseBody
-  public String invokeTestService() {
-    List<ServiceInstance> testServiceInstances = this.discoveryClient.getInstances("test-service");
-    return restTemplate.getForObject(testServiceInstances.get(0).getUri(), String.class);
-  }
-
-  @GetMapping("/services")
-  public List<String> services() {
-    return this.discoveryClient.getServices();
-  }
-
-  @GetMapping("/services/{serviceId}")
-  public List<ServiceInstance> servicesById(@PathVariable("serviceId") String serviceId) {
-    return this.discoveryClient.getInstances(serviceId);
-  }*/

@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
 
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_REQUEST_URL_ATTR;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR;
@@ -44,31 +43,10 @@ public class RouteToLocalServicesFilter implements GatewayFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String serviceName = getServiceName(exchange);
         String requestSourceRoute = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
-
         Route route = exchange.getAttribute(GATEWAY_ROUTE_ATTR);
-
-        //route.getUri().getHost().toLowerCase();
-        LOGGER.info("route.getUri" + route.getUri());
-        LOGGER.info("route.port" + route.getUri().getPort());
-        LOGGER.info("route.getUri" + route.getUri().getHost());
-
-
-        LOGGER.info("requestSourceRoute" + requestSourceRoute);
-        LOGGER.info("getAddress" + exchange.getRequest().getRemoteAddress().getAddress());
-        try {
-            LOGGER.info("getLocalHost" + exchange.getRequest().getRemoteAddress().getAddress().getLocalHost());
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        LOGGER.info("getHostAddress" + exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
-        LOGGER.info("getCanonicalHostName" + exchange.getRequest().getRemoteAddress().getAddress().getCanonicalHostName());
-        LOGGER.info("getURI" + exchange.getRequest().getURI());
-        LOGGER.info("getLoopbackAddress" + exchange.getRequest().getRemoteAddress().getAddress().getLoopbackAddress());
-        LOGGER.info("getLoopbackAddress" + exchange.getRequest().getRemoteAddress().getAddress().getLoopbackAddress());
+        LOGGER.info("Request was send from {}", requestSourceRoute);
 
         String mainContainerPort = System.getenv("PORT_TO_REDIRECT");
-
-
         if (clientsHolder.contains(requestSourceRoute)) {
             sendToSender(exchange, requestSourceRoute, mainContainerPort);
         } else {
@@ -97,7 +75,7 @@ public class RouteToLocalServicesFilter implements GatewayFilter, Ordered {
     private void sendToMainContainer(ServerWebExchange exchange, String requestSourceRoute, String mainContainerPort) {
         ///направить на бывший
         LOGGER.info("Try to send to main container on port {}", mainContainerPort);
-        LOGGER.info("Service with port {} was not available on {}", mainContainerPort, requestSourceRoute);
+        LOGGER.debug("Service with port {} was not available on {}", mainContainerPort, requestSourceRoute);
 
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
         UriComponents mainContainerUriString = builder.scheme("http").host("localhost").port(mainContainerPort).path("").build();

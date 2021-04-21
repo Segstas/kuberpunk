@@ -1,7 +1,6 @@
 package com.kuberpunk.strategy;
 
 import com.kuberpunk.input.InputClusterArgs;
-import io.fabric8.kubernetes.api.model.ConfigMapKeySelector;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -11,10 +10,6 @@ public class OpenShiftSidecarStrategy implements SubstitutionStrategy, ProxyLife
 
     @Override
     public void startProxying(InputClusterArgs inputClusterArgs) {
-        ConfigMapKeySelector configMapKeySelector = new ConfigMapKeySelector();
-        configMapKeySelector.setName(inputClusterArgs.getService() + "-kuberpunk-replacement");
-        configMapKeySelector.setKey("localhost.route");
-
         apply(inputClusterArgs);
     }
 
