@@ -17,7 +17,7 @@ public class SidecarDeployments {
 
     public static void main(String... args) {
         SpringApplication.run(SidecarDeployments.class, args);
-        LOGGER.info("*** Kuberpunk cloud controller v2.6 ***");
+        LOGGER.info("*** Kuberpunk cloud controller v2.9 ***");
         startWatching();
     }
 

@@ -1,8 +1,6 @@
 package com.kuberpunk.deployments;
 
 import com.kuberpunk.controller.ServiceData;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
@@ -14,7 +12,6 @@ import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
-import io.fabric8.kubernetes.client.dsl.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,9 +27,10 @@ public class SidecarDeploymentsWatcher implements Watcher<Deployment> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SidecarDeploymentsWatcher.class);
     private static final String SIDECAR_IMAGE_NAME = "mabikon/kuberpunk-cloud-replacement";
-    private static final String SIDECAR_IMAGE_TAG = "2.6";
+    private static final String SIDECAR_IMAGE_TAG = "2.9";
 
     private static final String SIDECAR_POD_NAME = "sidecar";
+    private static final String SIDECAR_CONTAINER_NAME = "kuberpunk-cloud-proxy";
     public static final String NAMESPACE = "default";
     public static final Integer SIDECAR_TARGET_PORT = 1234;
 
@@ -55,61 +53,32 @@ public class SidecarDeploymentsWatcher implements Watcher<Deployment> {
                 if (!alreadyHasSidecar(deployment)) {
                     createSidecar(deployment);
                 } else {
-                    LOGGER.info("Sidecar already existing for pod {}", deployment.getMetadata().getName());
+                    LOGGER.info("Sidecar already existing for deployment {}", deployment.getMetadata().getName());
                 }
             }
         }
         if (action == Action.DELETED) {
             var namespace = deployment.getMetadata().getNamespace();
             if (NAMESPACE.equals(namespace) && !isController(deployment)) {
-                if (!alreadyHasSidecar(deployment)) {
+                if (alreadyHasSidecar(deployment)) {
                     returnAsBeforeForService(deployment);
                 } else {
-                    LOGGER.info("Sidecar already existing for pod {}", deployment.getMetadata().getName());
+                    LOGGER.info("Deployment's service {} was not proxied by Kuberpunk ", deployment.getMetadata().getName());
+                }
+            } else {
+                if (NAMESPACE.equals(namespace) && isController(deployment)) {
+                    onClose();
                 }
             }
         }
     }
 
-    @Override
-    public void onClose() {
-        oldServicePortsMap.keySet().forEach(this::doReturnAsBeforeForService);
-    }
-
-    @Override
-    public void onClose(WatcherException cause) {
-
-        oldServicePortsMap.keySet().forEach(this::doReturnAsBeforeForService);
-    }
-
-    private void returnAsBeforeForService(Deployment deployment) {
-        String serviceName = deployment.getMetadata().getName();
-        String namespace = deployment.getMetadata().getNamespace();
-        ServiceData serviceToDelete = new ServiceData(serviceName, namespace);
-        doReturnAsBeforeForService(serviceToDelete);
-    }
-
-    private void doReturnAsBeforeForService(ServiceData serviceToDelete) {
-        String serviceName = serviceToDelete.getService();
-        String namespace = serviceToDelete.getNamespace();
-        List<ServicePort> replacedServicePorts = client.services().inNamespace(namespace).withName(serviceName).get().getSpec().getPorts();
-        client.services().inNamespace(namespace).withName(serviceName).edit(
-                s -> new ServiceBuilder(s)
-                        .editSpec()
-                        .removeAllFromPorts(replacedServicePorts)
-                        .addAllToPorts(oldServicePortsMap.get(serviceToDelete))
-                        .endSpec().build());
-    }
-
     private boolean isController(Deployment deployment) {
         var deploymentName = Optional.ofNullable(deployment.getMetadata().getName());
         var labels = Optional.ofNullable(deployment.getMetadata().getLabels());
-        LOGGER.info("check if {} is a controller deployment,", deploymentName);
-        LOGGER.info("check {} ,", cloudControllerServiceName.equals(deploymentName.get()) ||
-                cloudControllerServiceName.equals(
-                        labels.orElse(new HashMap<>()).get("app")
-                ));
-
+        LOGGER.info("check if {} is a controller deployment: {}", deploymentName,
+                cloudControllerServiceName.equals(deploymentName.get()) || cloudControllerServiceName.equals(
+                        labels.orElse(new HashMap<>()).get("app")));
         return cloudControllerServiceName.equals(deploymentName.get()) ||
                 cloudControllerServiceName.equals(
                         labels.orElse(new HashMap<>()).get("app")
@@ -130,6 +99,7 @@ public class SidecarDeploymentsWatcher implements Watcher<Deployment> {
                                     .editTemplate()
                                         .editSpec()
                                             .addNewContainer()
+                                            .withName(SIDECAR_CONTAINER_NAME)
                                                 .addNewEnv()
                                                     .withName("PORT_TO_REDIRECT")
                                                     .withNewValue(String.valueOf(oldTargetPort))
@@ -158,7 +128,6 @@ public class SidecarDeploymentsWatcher implements Watcher<Deployment> {
         );
     }
 
-
     private boolean alreadyHasSidecar(Deployment deployment) {
         List<Container> containers = deployment.getSpec().getTemplate().getSpec().getContainers();
         LOGGER.info("check if deployment: {} already has sidecar: {},",deployment.getMetadata().getName(), containers
@@ -170,27 +139,64 @@ public class SidecarDeploymentsWatcher implements Watcher<Deployment> {
                 .anyMatch(it -> it.getName().equals(SIDECAR_POD_NAME));
     }
 
-    private boolean isAssignedSidecar(Deployment deployment) {
-        var metadata = deployment.getMetadata();
-        return metadata.getName().startsWith(SIDECAR_POD_NAME + "-")
-                && metadata.getOwnerReferences().stream()
-                .anyMatch(it -> "Pod".equals(it.getKind()) && "v1".equals(it.getApiVersion()));
-    }
-
     private ServicePort replaceTargetPorts(ServicePort port, Integer targetPort) {
             return new ServicePortBuilder(port).withTargetPort(new IntOrString(targetPort)).build();
         }
 
-    public void pullConfigMap(String serviceName, String namespace, Integer port) {
-        Resource<ConfigMap> configMapResource = client.configMaps().inNamespace(namespace).withName("kuberpunk");
-        configMapResource.createOrReplace(new ConfigMapBuilder()
-                .withApiVersion("v1")
-                .withNewMetadata()
-                .withName(serviceName + "-main-container-target-port")
-                .addToLabels("app", serviceName)
-                .endMetadata().
-                        addToData("PORT_TO_REDIRECT", String.valueOf(port)). /////заменить хардкод
-                build());
+
+    @Override
+    public void onClose() {
+        oldServicePortsMap.keySet().forEach(this::returnAsBeforeForDeploymentAndService);
     }
 
+    @Override
+    public void onClose(WatcherException cause) {
+        onClose();
+    }
+
+    private void returnAsBeforeForService(Deployment deployment) {
+        String serviceName = deployment.getMetadata().getName();
+        String namespace = deployment.getMetadata().getNamespace();
+        ServiceData serviceToDelete = new ServiceData(serviceName, namespace);
+        doReturnAsBeforeForService(serviceToDelete);
+    }
+
+    private void returnAsBeforeForDeploymentAndService(ServiceData serviceToDelete) {
+        doReturnAsBeforeForService(serviceToDelete);
+        doReturnAsBeforeForDeployment(serviceToDelete);
+    }
+
+    private void doReturnAsBeforeForService(ServiceData serviceToDelete) {
+        String serviceName = serviceToDelete.getService();
+        String namespace = serviceToDelete.getNamespace();
+        List<ServicePort> replacedServicePorts = client.services().inNamespace(namespace).withName(serviceName).get().getSpec().getPorts();
+        client.services().inNamespace(namespace).withName(serviceName).edit(
+                s -> new ServiceBuilder(s)
+                        .editSpec()
+                        .removeAllFromPorts(replacedServicePorts)
+                        .addAllToPorts(oldServicePortsMap.get(serviceToDelete))
+                        .endSpec().build());
+    }
+
+    private void doReturnAsBeforeForDeployment(ServiceData serviceToDelete) {
+        String serviceName = serviceToDelete.getService();
+        String namespace = serviceToDelete.getNamespace();
+
+        Container[] containersWithKuberpunkProxy = client.apps().deployments().inNamespace(namespace)
+                .withName(serviceName).get().getSpec().getTemplate().getSpec().getContainers().stream()
+                .filter(container -> container.getName().equals(SIDECAR_CONTAINER_NAME)).toArray(Container[]::new);
+
+        client.apps().deployments().inNamespace(namespace)
+                .withName(serviceName).edit(
+                d -> new DeploymentBuilder(d)
+                        .editSpec()
+                            .editTemplate()
+                                .editSpec()
+                                    .removeFromContainers(containersWithKuberpunkProxy)
+                                .endSpec()
+                            .endTemplate()
+                        .endSpec()
+                        .build()
+        );
+    }
 }

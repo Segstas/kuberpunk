@@ -4,17 +4,18 @@ import com.kuberpunk.cloudcomponents.creaters.CloudComponentsCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultDeploymentsCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultRouteCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultServiceCreator;
-import com.kuberpunk.hostextraction.RestRedirectInformationPullerImpl;
+import com.kuberpunk.hostextraction.RestRedirectInformationPusherImpl;
+import com.kuberpunk.input.ArgumentParser;
 import com.kuberpunk.strategy.SubstitutionStrategy;
 import com.kuberpunk.strategy.chain.CloudControllerHandler;
 import com.kuberpunk.cloudcomponents.ServiceAccountWorker;
 import com.kuberpunk.cloudcomponents.ServiceAccountWorkerImpl;
 import com.kuberpunk.hostextraction.RedirectAddressMiner;
 import com.kuberpunk.hostextraction.RedirectAddressMinerImpl;
-import com.kuberpunk.hostextraction.RedirectInformationPuller;
+import com.kuberpunk.hostextraction.RedirectInformationPusher;
 import com.kuberpunk.strategy.OpenShiftSidecarStrategy;
 import com.kuberpunk.strategy.ProxyLifeCycleStrategy;
-import com.kuberpunk.strategy.chain.ConfigCreator;
+import com.kuberpunk.strategy.chain.ConfigPusher;
 import com.kuberpunk.strategy.chain.ServiceAccountCreator;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -23,6 +24,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SpringConfig {
+    @Bean
+    ArgumentParser argumentParser(ProxyLifeCycleStrategy proxyLifeCycleStrategy){
+        return new ArgumentParser(proxyLifeCycleStrategy);
+    }
+
     @Bean
     RedirectAddressMiner redirectAddressMiner() {
         return new RedirectAddressMinerImpl();
@@ -39,9 +45,9 @@ public class SpringConfig {
     }
 
     @Bean
-    RedirectInformationPuller redirectInformationPuller(OpenShiftClient openShiftClient,
+    RedirectInformationPusher redirectInformationPusher(OpenShiftClient openShiftClient,
                                                         RedirectAddressMiner redirectAddressMiner) {
-        return new RestRedirectInformationPullerImpl(openShiftClient, redirectAddressMiner);
+        return new RestRedirectInformationPusherImpl(openShiftClient, redirectAddressMiner);
     }
 
     @Bean
@@ -60,17 +66,16 @@ public class SpringConfig {
     }
 
     @Bean
-    SubstitutionStrategy configCreator(RedirectInformationPuller redirectInformationPuller) {
-        return new ConfigCreator(redirectInformationPuller);
+    SubstitutionStrategy configPusher(RedirectInformationPusher redirectInformationPusher) {
+        return new ConfigPusher(redirectInformationPusher);
     }
 
     @Bean
-    SubstitutionStrategy cloudControllerHandler(SubstitutionStrategy configCreator,
+    SubstitutionStrategy cloudControllerHandler(SubstitutionStrategy configPusher,
                                                 CloudComponentsCreator deploymentsCreator,
                                                 CloudComponentsCreator serviceCreator,
-                                                CloudComponentsCreator routeCreator,
-                                                OpenShiftClient openShiftClient) {
-        return new CloudControllerHandler(configCreator, deploymentsCreator, serviceCreator, routeCreator);
+                                                CloudComponentsCreator routeCreator) {
+        return new CloudControllerHandler(configPusher, deploymentsCreator, serviceCreator, routeCreator);
     }
 
     @Bean
