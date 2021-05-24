@@ -22,6 +22,8 @@ public class DefaultServiceCreator implements CloudComponentsCreator {
     @Value( "${cloud.controller.service.name}")
     private String cloudControllerServiceName;
 
+    private String HOST_PORT= "30022";
+
     public DefaultServiceCreator(OpenShiftClient openShiftClient) {
         this.openShiftClient = openShiftClient;
     }
@@ -52,6 +54,13 @@ public class DefaultServiceCreator implements CloudComponentsCreator {
                     .withProtocol("TCP")
                     .withPort(80)
                         .withTargetPort(new IntOrString(Integer.valueOf(cloudControllerPort)))
+                    .endPort()
+                .addNewPort()
+                        .withName("ssh-port")
+                    .withProtocol("TCP")
+                    .withPort(2022)
+                        .withTargetPort(new IntOrString(Integer.valueOf(22)))
+                        .withNodePort(Integer.valueOf(HOST_PORT))
                     .endPort()
                 .endSpec()
                 .build();

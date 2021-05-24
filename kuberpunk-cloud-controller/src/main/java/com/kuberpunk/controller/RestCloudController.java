@@ -40,7 +40,7 @@ public class RestCloudController {
     }
 
     @PostMapping("/register-client/{serviceId}/{ip}/{port}")
-    boolean registerClientwithPOrt(@PathVariable("serviceId") String serviceId,
+    boolean registerClientWithPort(@PathVariable("serviceId") String serviceId,
                                    @PathVariable("ip") String ip,
                                    @PathVariable("port") String port) {
         LOGGER.info("Catch \"Register Client\" command from IP: {} for service: {} with target port: {} ",

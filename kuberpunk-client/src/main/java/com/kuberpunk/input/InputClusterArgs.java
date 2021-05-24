@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.lang.Nullable;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class InputClusterArgs {
@@ -18,5 +20,8 @@ public class InputClusterArgs {
 
     @Nullable
     private String port;
+
+    @Nullable
+    private List<String> nextServices;
 
 }

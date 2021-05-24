@@ -13,6 +13,9 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.kuberpunk.input.LifeCycleCommand.START;
 import static com.kuberpunk.input.LifeCycleCommand.STOP;
 
@@ -37,6 +40,8 @@ public class ArgumentParser {
                 true, "Namespace in which you work");
         options.addOption("p", "port", true,
                 "The port on your computer to which the call will be forwarded");
+        options.addOption("t", "chain", true,
+                "Next services in request chain");
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
 
@@ -64,6 +69,12 @@ public class ArgumentParser {
             if (cmd.hasOption("p")) {
                 logger.info("Added port: {}", cmd.getOptionValue("p"));
                 inputClusterArgs.setPort(cmd.getOptionValue("p"));
+            }
+            if (cmd.hasOption("t")) {
+                logger.info("Next services: {}", cmd.getOptionValue("t"));
+                List<String> nextServices = new ArrayList<>();
+                nextServices.add(cmd.getOptionValue("t"));
+                inputClusterArgs.setNextServices(nextServices);
             }
             if (cmd.hasOption("start")) {
                 inputClusterArgs.setCycleCommand(START);

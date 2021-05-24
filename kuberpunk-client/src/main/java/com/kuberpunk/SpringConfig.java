@@ -6,6 +6,7 @@ import com.kuberpunk.cloudcomponents.creaters.DefaultRouteCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultServiceCreator;
 import com.kuberpunk.hostextraction.RestRedirectInformationPusherImpl;
 import com.kuberpunk.input.ArgumentParser;
+import com.kuberpunk.redirection.TunnelCreator;
 import com.kuberpunk.strategy.SubstitutionStrategy;
 import com.kuberpunk.strategy.chain.CloudControllerHandler;
 import com.kuberpunk.cloudcomponents.ServiceAccountWorker;
@@ -89,6 +90,11 @@ public class SpringConfig {
     @Bean
     ProxyLifeCycleStrategy proxyLifeCycleStrategy(SubstitutionStrategy serviceAccountCreator) {
         return new OpenShiftSidecarStrategy(serviceAccountCreator);
+    }
+
+    @Bean
+    TunnelCreator tunnelCreator(OpenShiftClient openShiftClient) {
+        return new TunnelCreator(openShiftClient);
     }
 }
 

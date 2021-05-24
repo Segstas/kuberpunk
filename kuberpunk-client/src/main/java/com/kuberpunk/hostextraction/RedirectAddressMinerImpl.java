@@ -28,6 +28,7 @@ public class RedirectAddressMinerImpl implements RedirectAddressMiner {
                                 stream()
                                 .filter(interfaceAddress ->
                                         interfaceAddress.getAddress().isSiteLocalAddress())
+                                .filter(interfaceAddress -> net.getDisplayName().equals("bridge100")) ///TODO how to find ip
                                 .map(interfaceAddress -> interfaceAddress.getAddress().getHostAddress())
                                 .collect(Collectors.toSet());
                 if (!interfaceAddresses.isEmpty()) {
