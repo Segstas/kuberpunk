@@ -28,21 +28,6 @@ public class KuberpunkApplication implements CommandLineRunner {
     public void run(String... args) {
         ArgumentParser argumentParser = context.getBean(ArgumentParser.class);
         argumentParser.parse(args);
-        System.out.println('\n');
-/*        String[] args2 = new String[] {"sudo","-S", "sshuttle", "-r", "python-sshd", "-e",
-                "/Users/a18851548/learning/Learning_MIPT_NEW/diploma2021/tryFeb/kuberpunk/kuberpunk-client/kuttle",
-                "employee"};
-
-
-      [
- */
-       /* SSHTestServer sshTestServer = new SSHTestServer();
-        try {
-            sshTestServer.startServer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-    }
 
     @GetMapping("/")
     public String redirectToCloud(){
@@ -53,7 +38,5 @@ public class KuberpunkApplication implements CommandLineRunner {
     public String actuator(){
         return "redirected";
     }
-
-
 
 }

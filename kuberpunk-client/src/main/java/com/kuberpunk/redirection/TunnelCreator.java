@@ -59,16 +59,11 @@ public class TunnelCreator implements SubstitutionStrategy {
         }
 
         //TODO make commands in normal format
-        String SCRIPT_FILE_NAME = "/Users/a18851548/learning/Learning_MIPT_NEW/diploma2021/openshift/mysshuttle/sshuttle/sshuttle/__main__.py";
-        String cmd1 = "-r " + "python-sshd";
-        String cmd2 = " -e /Users/a18851548/learning/Learning_MIPT_NEW/diploma2021/tryFeb/kuberpunk/kuberpunk-client/kuttle " + nextChainServiceIPs;
-        String cmd = cmd1 + cmd2;
-
-        ProcessBuilder pb = new ProcessBuilder("/Users/a18851548/learning/Learning_MIPT_NEW/diploma2021/tryFeb/kuberpunk/kuberpunk-client/sshuttle-over-k8s.sh");
+        ProcessBuilder pb = new ProcessBuilder("./sshuttle-over-k8s.sh");
         Process p = pb.start();
-        /// p.waitFor();
         String[] args = new String[]{"sudo","-S","sshuttle", "-r", "python-sshd", "-e",
-                "/Users/a18851548/learning/Learning_MIPT_NEW/diploma2021/tryFeb/kuberpunk/kuberpunk-client/kuttle",
+                "./kuttle",
+
                 nextChainServiceIPs.toString()};
 
         ProcessBuilder builder = new ProcessBuilder();
