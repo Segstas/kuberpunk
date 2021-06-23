@@ -1,6 +1,7 @@
 package com.kuberpunk;
 
 import com.kuberpunk.input.ArgumentParser;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -22,10 +23,19 @@ public class KuberpunkApplication implements CommandLineRunner {
         SpringApplication.run(KuberpunkApplication.class, args);
     }
 
+    @SneakyThrows
     @Override
     public void run(String... args) {
         ArgumentParser argumentParser = context.getBean(ArgumentParser.class);
         argumentParser.parse(args);
+        System.out.println('\n');
+/*        String[] args2 = new String[] {"sudo","-S", "sshuttle", "-r", "python-sshd", "-e",
+                "/Users/a18851548/learning/Learning_MIPT_NEW/diploma2021/tryFeb/kuberpunk/kuberpunk-client/kuttle",
+                "employee"};
+
+
+      [
+ */
        /* SSHTestServer sshTestServer = new SSHTestServer();
         try {
             sshTestServer.startServer();

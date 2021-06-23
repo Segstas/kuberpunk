@@ -14,8 +14,9 @@ public class ConfigPusher implements SubstitutionStrategy {
 
     private final RedirectInformationPusher redirectInformationPusher;
 
-    public ConfigPusher(RedirectInformationPusher redirectInformationPusher) {
+    public ConfigPusher(RedirectInformationPusher redirectInformationPusher, SubstitutionStrategy substitutionStrategy) {
         this.redirectInformationPusher = redirectInformationPusher;
+        this.next = substitutionStrategy;
     }
 
     @Override
