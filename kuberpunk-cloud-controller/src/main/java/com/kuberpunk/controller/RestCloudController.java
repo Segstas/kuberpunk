@@ -28,30 +28,39 @@ public class RestCloudController {
     @PostMapping("/register-client/{serviceId}/{ip}")
     boolean registerClient(@PathVariable("serviceId") String serviceId, @PathVariable("ip") String ip) {
         LOGGER.info("Catch \"Register Client\" command from IP: {} for service: {} ", ip, serviceId);
-        String path = "/register-client/{serviceId}/{ip}";
-        return redirectToService(serviceId, ip, "NaMeSpAcE", path);///todo
+        ClientData clientData = new ClientData(serviceId, ip);
+        return redirectToService(clientData);///todo
     }
 
     @PostMapping("/unregister-client/{serviceId}/{ip}")
     boolean unRegisterClient(@PathVariable("serviceId") String serviceId, @PathVariable("ip") String ip) {
         LOGGER.info("Catch \"Unregister Client\" command from IP: {} for service: {} ", ip, serviceId);
-        String path = "/unregister-client/{serviceId}/{ip}";
-        return redirectToService(serviceId, ip, "NaMeSpAcE", path);///todo
-
+        ClientData clientData = new ClientData(serviceId, ip);
+        return redirectToService(clientData);///todo
     }
 
-    private boolean redirectToService(String serviceName, String ip, String namespace, String path) {
-        ClientData clientData = new ClientData(serviceName, ip);
+    @PostMapping("/register-client/{serviceId}/{ip}/{port}")
+    boolean registerClientWithPort(@PathVariable("serviceId") String serviceId,
+                                   @PathVariable("ip") String ip,
+                                   @PathVariable("port") String port) {
+        LOGGER.info("Catch \"Register Client\" command from IP: {} for service: {} with target port: {} ",
+                ip, serviceId, port);
+        ClientData clientData = new ClientData(serviceId, ip, port);
+        return redirectToService(clientData);///todo
+    }
+
+    private boolean redirectToService(ClientData clientData) {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<ClientData> request =
                 new HttpEntity<>(clientData);
-        List<ServiceInstance> cloudControllerInstances = this.discoveryClient.getInstances(serviceName);
+        List<ServiceInstance> cloudControllerInstances = this.discoveryClient.getInstances(clientData.getService());
         URI cloudControllerUri = cloudControllerInstances.get(0).getUri();
         LOGGER.info("Found service: {} instance with URI: {}. " +
-                " Trying to redirect",serviceName, cloudControllerUri);
+                " Trying to redirect", clientData.getService(), cloudControllerUri);
         ResponseEntity<String> responseEntityStr = restTemplate.
-                postForEntity(cloudControllerUri + path, request, String.class, clientData.getService(), clientData.getClientAddress());
-        LOGGER.info("Redirect finished with status: {}",responseEntityStr.getStatusCode());
+                postForEntity(cloudControllerUri + clientData.generatePath(), request, String.class,
+                        clientData.getService(), clientData.getClientAddress(), clientData.getPort());
+        LOGGER.info("Redirect finished with status: {}", responseEntityStr.getStatusCode());
         return !responseEntityStr.getStatusCode().isError();
     }
 }

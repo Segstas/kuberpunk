@@ -29,7 +29,7 @@ public class ClientsHolderImpl implements ClientsHolder {
     @Override
     public boolean deleteClient(ClientHostData clientHostData) {
         Integer deletedClientPort = activeClients.remove(clientHostData.getIp());
-        LOGGER.info("Client {}:{} added to Clients Holder", clientHostData.getIp(), deletedClientPort);
+        LOGGER.info("Client {}:{} deleted from Clients Holder", clientHostData.getIp(), deletedClientPort);
         return true;
     }
 

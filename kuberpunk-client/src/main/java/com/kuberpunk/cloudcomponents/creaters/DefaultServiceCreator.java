@@ -22,6 +22,8 @@ public class DefaultServiceCreator implements CloudComponentsCreator {
     @Value( "${cloud.controller.service.name}")
     private String cloudControllerServiceName;
 
+    private String HOST_PORT= "30022";
+
     public DefaultServiceCreator(OpenShiftClient openShiftClient) {
         this.openShiftClient = openShiftClient;
     }

@@ -34,6 +34,11 @@ public class GatewayApplication {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GatewayApplication.class);
 
+  public static void main(String[] args) {
+    SpringApplication.run(GatewayApplication.class, args);
+    LOGGER.info("*** Kuberpunk cloud proxy v2.9 ***");
+  }
+
   @Bean
   public RouteLocator myRoutes(RouteLocatorBuilder builder) {
     return builder.routes()
@@ -53,6 +58,15 @@ public class GatewayApplication {
     return clientsHolder.addClient(new ClientHostData(ip, Integer.valueOf(portForRedirect)));
   }
 
+  @PostMapping("/register-client/{serviceId}/{ip}/{port}")
+  boolean registerClientwithPOrt(@PathVariable("serviceId") String serviceId,
+                                 @PathVariable("ip") String ip,
+                                 @PathVariable("port") String port) {
+    LOGGER.info("Catch \"Register Client\" command from IP: {} for service: {} with target port: {} ",
+    ip, serviceId, port);
+    return clientsHolder.addClient(new ClientHostData(ip, Integer.valueOf(port)));
+  }
+
   @PostMapping("/unregister-client/{serviceId}/{ip}")
   public boolean unregisterClient(@PathVariable("serviceId") String serviceId, @PathVariable("ip") String ip){
     return clientsHolder.deleteClient(new ClientHostData(ip, null));
@@ -61,11 +75,5 @@ public class GatewayApplication {
   @GetMapping("/get-clients/")
   public String getClients(){
     return clientsHolder.getClients().toString();
-  }
-
-
-  public static void main(String[] args) {
-    SpringApplication.run(GatewayApplication.class, args);
-    LOGGER.info("*** Kuberpunk cloud sidecar v1.0 ***");
   }
 }

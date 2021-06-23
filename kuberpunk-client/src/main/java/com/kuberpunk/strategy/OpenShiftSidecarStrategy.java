@@ -13,6 +13,11 @@ public class OpenShiftSidecarStrategy implements SubstitutionStrategy, ProxyLife
         apply(inputClusterArgs);
     }
 
+    @Override
+    public void stopProxying(InputClusterArgs inputClusterArgs) {
+        apply(inputClusterArgs);
+    }
+
 
     @Override
     public void apply(InputClusterArgs inputClusterArgs) {
