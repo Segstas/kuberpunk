@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 public class TunnelCreator implements SubstitutionStrategy {
 
     OpenShiftClient cloudClient;
+    String pythonHome = "/Users/a18851548/anaconda3";
+    String pythonPath = "/Users/a18851548/anaconda3/bin/python3";
 
     @Value("${cloud.controller.service.name}")
     private final String cloudControllerServiceName = "kuberpunk-cloud-controller";
@@ -57,12 +59,11 @@ public class TunnelCreator implements SubstitutionStrategy {
         }
 
         //TODO make commands in normal format
-
         ProcessBuilder pb = new ProcessBuilder("./sshuttle-over-k8s.sh");
         Process p = pb.start();
-        /// p.waitFor();
         String[] args = new String[]{"sudo","-S","sshuttle", "-r", "python-sshd", "-e",
                 "./kuttle",
+
                 nextChainServiceIPs.toString()};
 
         ProcessBuilder builder = new ProcessBuilder();

@@ -28,8 +28,6 @@ public class KuberpunkApplication implements CommandLineRunner {
     public void run(String... args) {
         ArgumentParser argumentParser = context.getBean(ArgumentParser.class);
         argumentParser.parse(args);
-        System.out.println('\n');
-    }
 
     @GetMapping("/")
     public String redirectToCloud(){
@@ -40,7 +38,5 @@ public class KuberpunkApplication implements CommandLineRunner {
     public String actuator(){
         return "redirected";
     }
-
-
 
 }
