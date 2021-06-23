@@ -5,7 +5,7 @@ import com.kuberpunk.cloudcomponents.creaters.DefaultDeploymentsCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultRouteCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultServiceCreator;
 import com.kuberpunk.hostextraction.RestRedirectInformationPusherImpl;
-import com.kuberpunk.input.ArgumentParser;
+import com.kuberpunk.input.ArgumentParserImpl;
 import com.kuberpunk.redirection.TunnelCreator;
 import com.kuberpunk.strategy.SubstitutionStrategy;
 import com.kuberpunk.strategy.chain.CloudControllerHandler;
@@ -26,8 +26,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SpringConfig {
     @Bean
-    ArgumentParser argumentParser(ProxyLifeCycleStrategy proxyLifeCycleStrategy){
-        return new ArgumentParser(proxyLifeCycleStrategy);
+    ArgumentParserImpl argumentParser(ProxyLifeCycleStrategy proxyLifeCycleStrategy){
+        return new ArgumentParserImpl(proxyLifeCycleStrategy);
     }
 
     @Bean
@@ -67,8 +67,8 @@ public class SpringConfig {
     }
 
     @Bean
-    SubstitutionStrategy configPusher(RedirectInformationPusher redirectInformationPusher) {
-        return new ConfigPusher(redirectInformationPusher);
+    SubstitutionStrategy configPusher(RedirectInformationPusher redirectInformationPusher, SubstitutionStrategy tunnelCreator) {
+        return new ConfigPusher(redirectInformationPusher, tunnelCreator);
     }
 
     @Bean
@@ -93,7 +93,7 @@ public class SpringConfig {
     }
 
     @Bean
-    TunnelCreator tunnelCreator(OpenShiftClient openShiftClient) {
+    SubstitutionStrategy tunnelCreator(OpenShiftClient openShiftClient) {
         return new TunnelCreator(openShiftClient);
     }
 }

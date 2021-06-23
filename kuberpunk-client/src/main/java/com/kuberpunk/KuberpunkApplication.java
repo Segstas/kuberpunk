@@ -1,6 +1,7 @@
 package com.kuberpunk;
 
 import com.kuberpunk.input.ArgumentParser;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -22,16 +23,12 @@ public class KuberpunkApplication implements CommandLineRunner {
         SpringApplication.run(KuberpunkApplication.class, args);
     }
 
+    @SneakyThrows
     @Override
     public void run(String... args) {
         ArgumentParser argumentParser = context.getBean(ArgumentParser.class);
         argumentParser.parse(args);
-       /* SSHTestServer sshTestServer = new SSHTestServer();
-        try {
-            sshTestServer.startServer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        System.out.println('\n');
     }
 
     @GetMapping("/")

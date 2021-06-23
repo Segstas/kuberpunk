@@ -55,13 +55,6 @@ public class DefaultServiceCreator implements CloudComponentsCreator {
                     .withPort(80)
                         .withTargetPort(new IntOrString(Integer.valueOf(cloudControllerPort)))
                     .endPort()
-                .addNewPort()
-                        .withName("ssh-port")
-                    .withProtocol("TCP")
-                    .withPort(2022)
-                        .withTargetPort(new IntOrString(Integer.valueOf(22)))
-                        .withNodePort(Integer.valueOf(HOST_PORT))
-                    .endPort()
                 .endSpec()
                 .build();
 

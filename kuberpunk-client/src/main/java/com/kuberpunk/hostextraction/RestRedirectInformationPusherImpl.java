@@ -2,7 +2,6 @@ package com.kuberpunk.hostextraction;
 
 import com.kuberpunk.controller.api.ClientData;
 import com.kuberpunk.input.InputClusterArgs;
-import com.kuberpunk.redirection.TunnelCreator;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -24,7 +23,6 @@ public class RestRedirectInformationPusherImpl implements RedirectInformationPus
 
     private String serviceProtocol = "http";
 
-    private TunnelCreator tunnelCreator;
 
     RedirectAddressMiner redirectAddressMiner;
     OpenShiftClient cloudClient;
@@ -35,10 +33,6 @@ public class RestRedirectInformationPusherImpl implements RedirectInformationPus
     public RestRedirectInformationPusherImpl(OpenShiftClient client, RedirectAddressMiner redirectAddressMiner) {
         this.cloudClient = client;
         this.redirectAddressMiner = redirectAddressMiner;
-
-
-        this.tunnelCreator = new TunnelCreator(client);
-
     }
 
     public void pushRedirectInformation(InputClusterArgs inputClusterArgs) {
@@ -48,14 +42,17 @@ public class RestRedirectInformationPusherImpl implements RedirectInformationPus
         HttpEntity<ClientData> request =
                 new HttpEntity<>(clientData);
         //todo add ping
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         ResponseEntity<String> responseEntityStr =
                 restTemplate.postForEntity(getRouteURI(inputClusterArgs) +
                                 inputClusterArgs.getCycleCommand().subPath + clientData.generatePath(),
                         request, String.class, clientData.getService(), clientData.getClientAddress(), clientData.getPort());
         logger.info("Request for adding service: {} in namespace:{} returned with status: {}",
                 inputClusterArgs.getService(), inputClusterArgs.getNamespace(), responseEntityStr.getStatusCode());
-
-        tunnelCreator.createTunnel(inputClusterArgs);
     }
 
     private String getRouteURI(InputClusterArgs inputClusterArgs) {
