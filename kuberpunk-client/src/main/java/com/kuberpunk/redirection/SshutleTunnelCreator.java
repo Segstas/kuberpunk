@@ -29,7 +29,9 @@ public class SshutleTunnelCreator implements SubstitutionStrategy, TunnelCreator
 
     @Override
     public void apply(InputClusterArgs inputClusterArgs) {
-        createTunnel(inputClusterArgs);
+        if ((inputClusterArgs.getNextServices() != null) && !inputClusterArgs.getNextServices().isEmpty()){
+            createTunnel(inputClusterArgs);
+        }
     }
 
     @Override
