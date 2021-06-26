@@ -6,7 +6,9 @@ import com.kuberpunk.cloudcomponents.creaters.DefaultRouteCreator;
 import com.kuberpunk.cloudcomponents.creaters.DefaultServiceCreator;
 import com.kuberpunk.hostextraction.RestRedirectInformationPusherImpl;
 import com.kuberpunk.input.ArgumentParserImpl;
-import com.kuberpunk.redirection.TunnelCreator;
+import com.kuberpunk.redirection.SshPodCreator;
+import com.kuberpunk.redirection.SshServiceCreator;
+import com.kuberpunk.redirection.SshutleTunnelCreator;
 import com.kuberpunk.strategy.SubstitutionStrategy;
 import com.kuberpunk.strategy.chain.CloudControllerHandler;
 import com.kuberpunk.cloudcomponents.ServiceAccountWorker;
@@ -94,7 +96,9 @@ public class SpringConfig {
 
     @Bean
     SubstitutionStrategy tunnelCreator(OpenShiftClient openShiftClient) {
-        return new TunnelCreator(openShiftClient);
+        SshPodCreator sshPodCreator = new SshPodCreator(openShiftClient);
+        SshServiceCreator sshServiceCreator = new SshServiceCreator(openShiftClient);
+        return new SshutleTunnelCreator(openShiftClient, sshPodCreator, sshServiceCreator);
     }
 }
 
