@@ -51,7 +51,7 @@ public class SshPodCreator implements CloudComponentsCreator {
                     .withContainerPort(22)
                     .endPort()
                    .endContainer()
-                   .withRestartPolicy("Newer")
+                   .withRestartPolicy("Never")
                    .endSpec()
                    .build();
 

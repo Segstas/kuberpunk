@@ -8,6 +8,8 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import lombok.SneakyThrows;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 public class SshutleTunnelCreator implements SubstitutionStrategy, TunnelCreator {
@@ -61,9 +63,9 @@ public class SshutleTunnelCreator implements SubstitutionStrategy, TunnelCreator
     }
 
     private void createSshuttleProcess(StringBuilder servicePodsIps) throws IOException, InterruptedException {
-        String[] args = new String[]{"sudo", "-S", "sshuttle", "-r", "python-sshd", "-e", "./kuttle",
-                servicePodsIps.toString()};
-
+        Path kuttlePath = Paths.get("kuttle");
+        String[] args = new String[]{"sudo", "-S", "sshuttle", "-r", "python-sshd", "-e",
+                kuttlePath.toAbsolutePath().toString(), servicePodsIps.toString()};
         ProcessBuilder builder = new ProcessBuilder();
         builder.command(args);
         builder.inheritIO();
